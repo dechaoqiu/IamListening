@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">我在听</string>
+	<string name="auth_string">请登录</string>
+    <string name="auth_success">登陆成功</string>
+    <string name="auth_failed">登陆失败</string>
+    <string name="toggleSync">是否自动同步</string>
+    <string name="setting">同步设置</string>
+</resources>
