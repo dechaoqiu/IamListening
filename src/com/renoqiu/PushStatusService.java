@@ -16,6 +16,7 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
@@ -90,27 +91,35 @@ public class PushStatusService extends Service {
 						WeiboActivity.accessToken = new Oauth2AccessToken(accessTokenForWeibo, expiresTimeForWeibo);
 						StatusesAPI api = new StatusesAPI(WeiboActivity.accessToken);
 						String message = "我在听" + artist + "的《" + trackName + "》。\r\n 通过我在听发布！";
-			            api.update(message, "90.00", "90.00", new RequestListener(){
-
+			            api.update(message, "", "", new RequestListener(){
 							@Override
 							public void onComplete(String arg0) {
 								// TODO Auto-generated method stub
 								Log.v("com.renoqiu","同步微博成功！");
-								//Toast.makeText(PushStatusService.this, "同步成功！", Toast.LENGTH_SHORT).show();
+								Message msg = new Message();
+								msg.what = 1;
+								msg.obj = "同步微博成功！";
+								handler.sendMessage(msg);
 							}
 
 							@Override
 							public void onError(WeiboException arg0) {
 								// TODO Auto-generated method stub
 								Log.v("com.renoqiu","同步微博失败！");
-								//Toast.makeText(PushStatusService.this, "同步失败！", Toast.LENGTH_SHORT).show();
+								Message msg = new Message();
+								msg.what = 1;
+								msg.obj = "同步微博失败！";
+								handler.sendMessage(msg);
 							}
 
 							@Override
 							public void onIOException(IOException arg0) {
 								// TODO Auto-generated method stub
 								Log.v("com.renoqiu","同步微博IOException！");
-								//Toast.makeText(PushStatusService.this, "出错了...", Toast.LENGTH_SHORT).show();
+								Message msg = new Message();
+								msg.what = 1;
+								msg.obj = "同步微博出错了！";
+								handler.sendMessage(msg);
 							}});
 
 					}else{
@@ -132,6 +141,7 @@ public class PushStatusService extends Service {
 		handler = new Handler() {
 			@Override
 			public void handleMessage(Message msg) {
+				Log.v("com.renoqiu",msg.toString());
 				switch (msg.what) {
 					case 0:
 						if((Integer)msg.obj != 1){
@@ -139,6 +149,9 @@ public class PushStatusService extends Service {
 						}else{
 							Toast.makeText(PushStatusService.this, "同步成功！", Toast.LENGTH_SHORT).show();
 						}
+						break;
+					case 1:
+						Toast.makeText(PushStatusService.this, msg.obj.toString(), Toast.LENGTH_SHORT).show();
 						break;
 				}
 			}
