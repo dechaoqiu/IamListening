@@ -18,12 +18,19 @@ public final class R {
         public static final int btn_logout_normal=0x7f020004;
         public static final int btn_logout_pressed=0x7f020005;
         public static final int ic_launcher=0x7f020006;
+        public static final int loginbtn_02=0x7f020007;
+        public static final int weibologin=0x7f020008;
+        public static final int weibologin_small=0x7f020009;
     }
     public static final class id {
         public static final int loginBtn=0x7f050001;
+        public static final int loginBtnForWeibo=0x7f050005;
         public static final int relativeLayout1=0x7f050002;
+        public static final int relativeLayout2=0x7f050006;
         public static final int syncToggleButton=0x7f050004;
+        public static final int syncToggleButtonForWeibo=0x7f050008;
         public static final int toggleTextView=0x7f050003;
+        public static final int toggleTextViewForWeibo=0x7f050007;
         public static final int web=0x7f050000;
     }
     public static final class layout {

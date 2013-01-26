@@ -13,6 +13,8 @@ import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 
+import com.renoqiu.util.MD5Helper;
+
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -51,7 +53,7 @@ public class LooperThread extends Thread{
             .append("status=").append(status)  
             .append("v=").append(v)
             .append(secretKey);
-        String sig = StatusPublishHelper.getMD5(sb.toString());  
+        String sig = MD5Helper.getMD5(sb.toString());  
 
         HttpPost httpRequest = new HttpPost(url);
 		List<NameValuePair> params = new ArrayList<NameValuePair>();

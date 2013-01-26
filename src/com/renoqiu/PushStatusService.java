@@ -1,5 +1,12 @@
 package com.renoqiu;
 
+import java.io.IOException;
+
+import com.weibo.sdk.android.Oauth2AccessToken;
+import com.weibo.sdk.android.WeiboException;
+import com.weibo.sdk.android.api.StatusesAPI;
+import com.weibo.sdk.android.net.RequestListener;
+
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -10,13 +17,15 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.util.Log;
 import android.widget.Toast;
 
 public class PushStatusService extends Service {
 	private Handler handler;
 	private com.renoqiu.LooperThread thread;
 	private SharedPreferences sharedPreferences;
-	private boolean syncFlag;
+	private boolean syncFlagForRenren;
+	private boolean syncFlagForWeibo;
 	private ConnectivityManager cm;
 	private NetworkInfo ni;
 
@@ -39,33 +48,77 @@ public class PushStatusService extends Service {
 	public void onStart(Intent intent, int startId) {
 		super.onStart(intent, startId);
 		
-		syncFlag = sharedPreferences.getBoolean("syncFlag",false);
-		if(syncFlag && checkNet()){
+		syncFlagForRenren = sharedPreferences.getBoolean("syncFlag",false);
+		syncFlagForWeibo = sharedPreferences.getBoolean("syncFlagForWeibo",false);
+		if((syncFlagForRenren || syncFlagForWeibo) && checkNet()){
 			if(intent != null){
 				Bundle myBundle = intent.getExtras();
 				String trackName = myBundle.getString("trackName");
 				String artist = myBundle.getString("artist");
-				String accessToken = sharedPreferences.getString("accessToken","");
-				
-				if(accessToken != null && !accessToken.equals("")){
-					String requestMethod = "status.set";
-					//接口名称  
-					String url = StatusPublishHelper.API_URL;
-					String secretKey = StatusPublishHelper.SECRET_KEY;
-					if(artist == null || artist.equals("")){
-						artist = "xxx";
+				Log.v("com.renoqiu", trackName);
+				Log.v("com.renoqiu", artist);
+				//Renren
+				String accessTokenForRenren = sharedPreferences.getString("accessToken","");
+				//Weibo
+				String accessTokenForWeibo = sharedPreferences.getString("accessTokenForWeibo","");
+				String expiresTimeForWeibo = sharedPreferences.getString("expiresTimeForWeibo","0");
+	    		if (syncFlagForRenren){
+	    			if(accessTokenForRenren != null && !accessTokenForRenren.equals("")){
+						String requestMethod = "status.set";
+						//接口名称  
+						String url = RenrenPublishHelper.API_URL;
+						String secretKey = RenrenPublishHelper.SECRET_KEY;
+						if(artist == null || artist.equals("")){
+							artist = "unknown";
+						}
+						if(trackName == null || trackName.equals("")){
+							trackName = "xxx";
+						}
+						String message = "我在听" + artist + "的《" + trackName + "》。\r\n 通过我在听发布！";
+						thread = new LooperThread(handler, requestMethod, "1.0", url, accessTokenForRenren, message, secretKey);
+						thread.start(); /* 启动线程 */
+					}else{
+						Toast.makeText(PushStatusService.this, "请登陆人人先！", Toast.LENGTH_SHORT).show();
+						SharedPreferences.Editor editor = sharedPreferences.edit();
+						editor.putBoolean("syncFlag", false);
+						editor.commit();
 					}
-					if(trackName == null || trackName.equals("")){
-						trackName = "xxx";
+	    		}
+				if (syncFlagForWeibo){
+					if(accessTokenForWeibo != null && !accessTokenForWeibo.equals("")){
+						//expiresTimeForWeibo TODO
+						WeiboActivity.accessToken = new Oauth2AccessToken(accessTokenForWeibo, expiresTimeForWeibo);
+						StatusesAPI api = new StatusesAPI(WeiboActivity.accessToken);
+						String message = "我在听" + artist + "的《" + trackName + "》。\r\n 通过我在听发布！";
+			            api.update(message, "90.00", "90.00", new RequestListener(){
+
+							@Override
+							public void onComplete(String arg0) {
+								// TODO Auto-generated method stub
+								Log.v("com.renoqiu","同步微博成功！");
+								//Toast.makeText(PushStatusService.this, "同步成功！", Toast.LENGTH_SHORT).show();
+							}
+
+							@Override
+							public void onError(WeiboException arg0) {
+								// TODO Auto-generated method stub
+								Log.v("com.renoqiu","同步微博失败！");
+								//Toast.makeText(PushStatusService.this, "同步失败！", Toast.LENGTH_SHORT).show();
+							}
+
+							@Override
+							public void onIOException(IOException arg0) {
+								// TODO Auto-generated method stub
+								Log.v("com.renoqiu","同步微博IOException！");
+								//Toast.makeText(PushStatusService.this, "出错了...", Toast.LENGTH_SHORT).show();
+							}});
+
+					}else{
+						Toast.makeText(PushStatusService.this, "请登陆微博先！", Toast.LENGTH_SHORT).show();
+						SharedPreferences.Editor editor = sharedPreferences.edit();
+						editor.putBoolean("syncFlagForWeibo", false);
+						editor.commit();
 					}
-					String message = "我在听" + artist + "的《" + trackName + "》。\r\n 通过我在听发布！";
-					thread = new LooperThread(handler, requestMethod, "1.0", url, accessToken, message, secretKey);
-					thread.start(); /* 启动线程 */
-				}else{
-					Toast.makeText(PushStatusService.this, "请登陆！", Toast.LENGTH_SHORT).show();
-					SharedPreferences.Editor editor = sharedPreferences.edit();
-					editor.putBoolean("syncFlag", false);
-					editor.commit();
 				}
 			}
 		}

@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
 public class MusicBroadcastReceiver extends BroadcastReceiver {
 	private static final Object SMSRECEIVED = "com.android.music.metachanged";
@@ -18,6 +19,7 @@ public class MusicBroadcastReceiver extends BroadcastReceiver {
     		Bundle myBundle = new Bundle();
     		myBundle.putString("trackName", trackName);
     		myBundle.putString("artist", artist);
+    		Log.v("com.renoqiu", "got broadcast"+trackName);
     		pushStatusIntent.putExtras(myBundle);
 			context.startService(pushStatusIntent);
 		}

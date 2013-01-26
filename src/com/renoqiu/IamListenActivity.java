@@ -20,7 +20,7 @@ public class IamListenActivity extends Activity {
         settings.setJavaScriptEnabled(true);  
         settings.setSupportZoom(true);  
         settings.setBuiltInZoomControls(true);  
-        webView.loadUrl(StatusPublishHelper.AUTHURL);
+        webView.loadUrl(RenrenPublishHelper.AUTHURL);
         webView.requestFocusFromTouch();  
         WebViewClient wvc = new WebViewClient() {  
             @Override  
